@@ -6,16 +6,17 @@ services:
       - '6379:6379'
   postgres:
     image: postgres:15
-    container_name: postgres_chat
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_USER: chatuser
       POSTGRES_PASSWORD: chatpass
       POSTGRES_DB: chatdb
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
   backend:
     build: ./backend
     container_name: chat_backend
@@ -23,8 +24,11 @@ services:
       - '4000:4000'
     environment:
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://chatuser:chatpass@postgres:5432/chatdb
     depends_on:
       - redis
+      - postgres
+    command: sh -c "npx prisma migrate dev --name init && npx prisma generate && npm run ts"
 
   frontend:
     build: ./frontend
