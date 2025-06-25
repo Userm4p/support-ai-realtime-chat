@@ -4,12 +4,36 @@ import { handleMessage } from '../utils/handleResponse';
 import { prisma, redisClient } from '../config';
 
 const getMessages = async (req: Request, res: Response) => {
-  res.status(200).json([
-    {
-      message: 'Messages fetched',
-    },
-  ]);
-  return;
+  const includeRest = req.query.include === 'rest';
+
+  try {
+    const rawRedis = await redisClient.lRange('chat:messages', 0, -1);
+    const redisMessages = rawRedis.map((msg) => JSON.parse(msg));
+
+    if (!includeRest) {
+      res.json({ messages: redisMessages });
+      return;
+    }
+
+    const redisIds = redisMessages.map((msg) => msg.id);
+
+    const dbMessages = await prisma.message.findMany({
+      where: {
+        NOT: {
+          id: { in: redisIds },
+        },
+      },
+      orderBy: { timestamp: 'asc' },
+    });
+
+    const allMessages = [...redisMessages, ...dbMessages];
+    res.json({ messages: allMessages });
+    return;
+  } catch (err) {
+    console.error('Error fetching messages:', err);
+    res.status(500).json({ error: 'Error fetching messages' });
+    return;
+  }
 };
 
 const createMessage = async (req: Request<{}, {}, Message, {}>, res: Response) => {
@@ -39,14 +63,16 @@ const createMessage = async (req: Request<{}, {}, Message, {}>, res: Response) =
         sender: 'user',
         content,
         timestamp: new Date().toISOString(),
+        id: createdMessages[0].id,
       }),
     );
     await redisClient.rPush(
       'chat:messages',
       JSON.stringify({
         sender: 'bot',
-        content,
+        content: botReply.reply,
         timestamp: new Date().toISOString(),
+        id: createdMessages[1].id,
       }),
     );
 
