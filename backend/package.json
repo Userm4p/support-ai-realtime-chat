@@ -7,7 +7,7 @@
     "build:commonjs": "rimraf lib && tsc --target es5 --outDir lib --module commonjs --declaration",
     "build:es": "rimraf es && tsc --target es6 --outDir es --module es6",
     "build": "npm run build:commonjs && npm run build:es",
-    "ts": "ts-node src/",
+    "ts": "ts-node src/index.ts",
     "prepublishOnly": "npm run build",
     "dev": "nodemon",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
@@ -37,12 +37,17 @@
     "es",
     "lib"
   ],
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "types": "./lib/index.d.ts",
   "jsnext:main": "./es/index.js",
   "module": "./es/index.js",
   "dependencies": {
+    "@prisma/client": "^6.10.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "mqtt": "^5.13.1"
+    "mqtt": "^5.13.1",
+    "redis": "^5.5.6"
   }
 }

@@ -1,10 +1,10 @@
-import { Router } from "express";
-import { createMessage, getMessages } from "../controllers/messages";
+import { Router } from 'express';
+import { createMessage, getMessages } from '../controllers/messages';
 
 const messages = Router();
 
-messages.get("/", getMessages);
+messages.get('/', getMessages);
 
-messages.post("/", createMessage);
+messages.post('/', createMessage);
 
 export default messages;

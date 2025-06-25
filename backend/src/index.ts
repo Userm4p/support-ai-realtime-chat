@@ -1,5 +1,5 @@
-import express from "express";
-import { envs } from "./config";
+import express from 'express';
+import { connectRedis, envs } from './config';
 import { router } from './routes';
 
 const app = express();
@@ -9,6 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(router);
 
-app.listen(envs.port, () => {
-    console.log(`Server is running on port ${envs.port}`);
+app.listen(envs.port, async () => {
+  await connectRedis();
+  console.log(`Server is running on port ${envs.port}`);
 });
