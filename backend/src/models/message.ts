@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 type Sender = 'user' | 'bot';
 
 interface Message {
@@ -7,4 +9,9 @@ interface Message {
   timestamp: Date;
 }
 
-export { Message };
+const messageSchema = z.object({
+  sender: z.enum(['user', 'bot']),
+  content: z.string().min(1),
+});
+
+export { Message, messageSchema };

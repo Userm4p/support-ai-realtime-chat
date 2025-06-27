@@ -24,8 +24,8 @@ const Message = ({ msg }: Props) => {
       >
         {msg.loading ? (
           <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-300">Generando respuesta </span>
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm text-gray-300">Generando respuesta...</span>
           </div>
         ) : (
           <div className="w-full">
@@ -34,9 +34,7 @@ const Message = ({ msg }: Props) => {
         )}
 
         {!msg.loading && (
-          <span className="text-[12px] text-gray-300 block mt-1">
-            {msg.timestamp}
-          </span>
+          <span className="text-[12px] text-gray-300 block mt-1">{msg.timestamp}</span>
         )}
       </div>
     </div>

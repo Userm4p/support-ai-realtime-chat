@@ -52,9 +52,8 @@ const messagesRepository = {
 
   countAllMessages: async function () {
     try {
-      const redisMessages = await this.getCachedMessages();
       const dbMessages = await this.getDbMessages();
-      return redisMessages.length + dbMessages.length;
+      return dbMessages.length;
     } catch (error) {
       console.error('Error al contar mensajes:', error);
       throw new Error('Error counting messages');
@@ -87,13 +86,11 @@ const messagesRepository = {
       if (mqttClient.connected) {
         mqttClient.publish(MQTT_TOPIC, JSON.stringify(message), { qos: 1 }, (error) => {
           if (error) {
-            console.error('Error al publicar mensaje en MQTT:', error);
-          } else {
-            console.log('✅ Mensaje publicado en MQTT:', message);
+            console.error(`[MQTT] Error trying to publish in: ${MQTT_TOPIC}`, error);
           }
         });
       } else {
-        console.warn('⚠️ MQTT no está conectado. Mensaje no enviado.');
+        console.warn('[MQTT] MQTT client is not connected, cannot publish message');
       }
     } catch (error) {
       console.error('Error al publicar mensaje en MQTT:', error);

@@ -20,5 +20,5 @@ app.use('/api', router);
 app.listen(envs.port, async () => {
   await connectRedis();
 
-  console.log(`Servidor corriendo en puerto ${envs.port}`);
+  console.log(`Server running on port: ${envs.port}`);
 });

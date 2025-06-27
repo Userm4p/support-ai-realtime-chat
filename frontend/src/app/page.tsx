@@ -1,12 +1,12 @@
 'use client';
+import ErrorToast from 'chatbot/components/ErrorsModal';
 import Loader from 'chatbot/components/Loader';
 import Message from 'chatbot/components/Message';
 import StartConversationHint from 'chatbot/components/StartConversationHint';
 import { ChatContext } from 'chatbot/context/chatContext';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 
 const Chat = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
   const {
     messages,
     input,
@@ -22,39 +22,52 @@ const Chat = () => {
     messagesToShow,
     currentConversationMessagesToShow,
     totalMessages,
+    containerRef,
   } = useContext(ChatContext);
 
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.scrollTop = container.scrollHeight;
-    }
-  }, []);
+  const showLoadPreviousMessagesButton = useMemo(() => {
+    return !loadingAllMessages && totalMessages > messages.length;
+  }, [loadingAllMessages, totalMessages, messages.length]);
+
+  const showStartConversationHint = useMemo(() => {
+    return (
+      !loadingMessages &&
+      !loadingAllMessages &&
+      messages.length === 0 &&
+      currentConversationMessagesToShow.length === 0
+    );
+  }, [loadingMessages, messages.length, currentConversationMessagesToShow.length, loadingAllMessages]);
+
+  const showOldMessagesAdvice = useMemo(() => {
+    return messages.length > 0;
+  }, [messages.length]);
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
+      <ErrorToast />
       <header className="bg-gray-950 shadow p-4 text-xl font-semibold">Chat Soporte</header>
       <main
         ref={containerRef}
         className="flex-1 overflow-y-auto p-4 space-y-3 bg-[url('/pattern.svg')] bg-repeat bg-gray-100"
       >
-        {!loadingAllMessages && totalMessages > messages.length && (
-          <button className="text-xs text-blue-600 underline mb-2" onClick={fetchAllMessages}>
+        {showLoadPreviousMessagesButton && (
+          <button
+            className="text-xs text-blue-600 underline mb-2 cursor-pointer"
+            onClick={fetchAllMessages}
+          >
             Cargar mensajes anteriores
           </button>
         )}
-        {!loadingMessages &&
-          !loadingAllMessages &&
-          messages.length === 0 &&
-          currentConversationMessagesToShow.length === 0 && <StartConversationHint />}
+        {showStartConversationHint && <StartConversationHint />}
         {loadingAllMessages && <Loader />}
         {messagesToShow.map(msg => (
           <Message key={msg.id} msg={msg} />
         ))}
-        {messages.length > 0 && (
+        {showOldMessagesAdvice && (
           <div className="flex justify-center items-center py-4">
             <span className="ml-2 text-sm text-gray-600">Mensajes antiguos</span>
           </div>
@@ -79,7 +92,7 @@ const Chat = () => {
         />
         <button
           onClick={handleSend}
-          className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-700"
+          className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-700 cursor-pointer"
         >
           Enviar
         </button>

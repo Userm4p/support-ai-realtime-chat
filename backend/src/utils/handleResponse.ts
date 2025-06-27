@@ -17,8 +17,8 @@ export async function handleMessage(userMessage: string) {
         botReply.reply = '¡De nada!';
         break;
       default:
-        const iaResponse = await openAiRequest(userMessage);
-        botReply.reply = iaResponse || 'Lo siento, no tengo una respuesta para eso.';
+        botReply.reply =
+          (await openAiRequest(userMessage)) || 'Lo siento, no tengo una respuesta para eso.';
         botReply.generateWithAi = true;
     }
   } catch (error) {

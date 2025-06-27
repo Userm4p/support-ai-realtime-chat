@@ -14,6 +14,7 @@ interface MessagesResp {
 
 export const useChat = (): ChatContextType => {
   const clientRef = useRef<mqtt.MqttClient | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentConversationMessages, setCurrentConversationMessages] = useState<Message[]>([]);
@@ -24,6 +25,7 @@ export const useChat = (): ChatContextType => {
   });
   const [input, setInput] = useState<string>('');
   const [totalMessages, setTotalMessages] = useState<number>(0);
+  const [errors, setErrors] = useState<string[]>([]);
 
   const instance = axios.create({
     baseURL: envs.backend,
@@ -36,6 +38,22 @@ export const useChat = (): ChatContextType => {
     setInput(e.target.value);
   }, []);
 
+  const handleScrollToBottom = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new MutationObserver(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+
+    observer.observe(container, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const fetchMessages = useCallback(async () => {
     setLoading(prev => ({ ...prev, messages: true }));
     try {
@@ -44,6 +62,7 @@ export const useChat = (): ChatContextType => {
       setTotalMessages(data.total);
     } catch (error) {
       console.error('Error fetching messages:', error);
+      setErrors(prev => [...prev, 'Error obteniendo mensajes']);
     } finally {
       setLoading(prev => ({ ...prev, messages: false }));
     }
@@ -54,12 +73,14 @@ export const useChat = (): ChatContextType => {
     try {
       const { data } = await instance.get<MessagesResp>('/api/messages?rest=true');
       setMessages(data.messages);
+      handleScrollToBottom();
     } catch (error) {
       console.error('Error fetching all messages:', error);
+      setErrors(prev => [...prev, 'Error Obteniendo todos los mensajes']);
     } finally {
       setLoading(prev => ({ ...prev, allMessages: false }));
     }
-  }, []);
+  }, [handleScrollToBottom]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim()) return;
@@ -71,15 +92,38 @@ export const useChat = (): ChatContextType => {
     };
     setCurrentConversationMessages(prev => [...prev, newMessage]);
     setLoading(prev => ({ ...prev, sendMessage: true }));
+    handleScrollToBottom();
     try {
       setInput('');
       await instance.post<Message>('/api/messages', newMessage);
     } catch (error) {
       console.error('Error sending message:', error);
+      setErrors(prev => [...prev, 'Error enviando mensaje']);
     } finally {
       setLoading(prev => ({ ...prev, sendMessage: false }));
     }
-  }, [input]);
+  }, [input, handleScrollToBottom]);
+
+  const formatMessagesToShow = useCallback((messages: Message[]) => {
+    return messages.map(msg => {
+      const date = new Date(msg.timestamp);
+      const formattedDate = new Intl.DateTimeFormat('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(date);
+
+      return {
+        ...msg,
+        timestamp: formattedDate,
+      };
+    });
+  }, []);
+
+  const handleCloseErrorsModal = useCallback(() => {
+    setErrors([]);
+  }, []);
 
   useEffect(() => {
     const client = mqtt.connect(envs.mqtt!);
@@ -97,6 +141,7 @@ export const useChat = (): ChatContextType => {
       setLoading(prev => ({ ...prev, sendMessage: false }));
       const parsedMessage: Message = JSON.parse(message.toString());
       setCurrentConversationMessages(prev => [...prev, parsedMessage]);
+      handleScrollToBottom();
     });
 
     clientRef.current = client;
@@ -104,41 +149,15 @@ export const useChat = (): ChatContextType => {
     return () => {
       client.end();
     };
-  }, []);
+  }, [handleScrollToBottom]);
 
   const messagesToShow = useMemo(() => {
-    return messages.map(msg => {
-      const date = new Date(msg.timestamp);
-      const formattedDate = new Intl.DateTimeFormat('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(date);
-
-      return {
-        ...msg,
-        timestamp: formattedDate,
-      };
-    });
-  }, [messages]);
+    return formatMessagesToShow(messages);
+  }, [messages, formatMessagesToShow]);
 
   const currentConversationMessagesToShow = useMemo(() => {
-    return currentConversationMessages.map(msg => {
-      const date = new Date(msg.timestamp);
-      const formattedDate = new Intl.DateTimeFormat('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(date);
-
-      return {
-        ...msg,
-        timestamp: formattedDate,
-      };
-    });
-  }, [currentConversationMessages]);
+    return formatMessagesToShow(currentConversationMessages);
+  }, [currentConversationMessages, formatMessagesToShow]);
 
   return {
     messages,
@@ -152,5 +171,8 @@ export const useChat = (): ChatContextType => {
     messagesToShow,
     currentConversationMessagesToShow,
     totalMessages,
+    errors,
+    handleCloseErrorsModal,
+    containerRef,
   };
 };

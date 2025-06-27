@@ -29,6 +29,9 @@ export interface ChatContextType {
   messagesToShow: Message[];
   currentConversationMessagesToShow: Message[];
   totalMessages: number;
+  errors: string[];
+  handleCloseErrorsModal: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null> | null;
 }
 
 export const ChatContext = createContext<ChatContextType>({
@@ -47,4 +50,7 @@ export const ChatContext = createContext<ChatContextType>({
   messagesToShow: [],
   currentConversationMessagesToShow: [],
   totalMessages: 0,
+  errors: [],
+  handleCloseErrorsModal: () => {},
+  containerRef: null,
 });
