@@ -5,9 +5,7 @@ dotenv.config();
 export const envs = {
   port: process.env.PORT || 3000,
   mqtt: {
-    host: process.env.MQTT_HOST,
-    port: process.env.MQTT_PORT,
-    topic: process.env.MQTT_TOPIC,
+    broker: process.env.MQTT_BROKER,
   },
   redis: {
     url: process.env.REDIS_URL,
@@ -15,4 +13,10 @@ export const envs = {
   postgres: {
     databaseUrl: process.env.DATABASE_URL,
   },
+  openai: {
+    apiKey: process.env.OPEN_ROUTER_API_KEY,
+    baseUrl: process.env.OPEN_ROUTER_BASE_URL,
+    model: process.env.OPEN_ROUTER_MODEL,
+  },
+  frontendUrl: process.env.FRONTEND_URL,
 };

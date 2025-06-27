@@ -1,33 +1,31 @@
 import { Request, Response } from 'express';
 import { Message } from '../models';
-import { handleMessage } from '../utils/handleResponse';
-import { prisma, redisClient } from '../config';
+import { handleMessage } from '../utils';
+import { messagesRepository } from '../repositories';
 
-const getMessages = async (req: Request, res: Response) => {
-  const includeRest = req.query.include === 'rest';
+const getMessages = async (
+  req: Request<
+    '',
+    '',
+    '',
+    {
+      rest: string;
+    }
+  >,
+  res: Response,
+) => {
+  const includeRest = req.query.rest === 'true';
 
   try {
-    const rawRedis = await redisClient.lRange('chat:messages', 0, -1);
-    const redisMessages = rawRedis.map((msg) => JSON.parse(msg));
+    const messageCount = await messagesRepository.countAllMessages();
 
     if (!includeRest) {
-      res.json({ messages: redisMessages });
+      const redisMessages = await messagesRepository.getCachedMessages();
+      res.json({ messages: redisMessages, total: messageCount });
       return;
     }
-
-    const redisIds = redisMessages.map((msg) => msg.id);
-
-    const dbMessages = await prisma.message.findMany({
-      where: {
-        NOT: {
-          id: { in: redisIds },
-        },
-      },
-      orderBy: { timestamp: 'asc' },
-    });
-
-    const allMessages = [...redisMessages, ...dbMessages];
-    res.json({ messages: allMessages });
+    const allMessages = await messagesRepository.getAllMessages();
+    res.json({ messages: allMessages, count: messageCount });
     return;
   } catch (err) {
     console.error('Error fetching messages:', err);
@@ -36,53 +34,25 @@ const getMessages = async (req: Request, res: Response) => {
   }
 };
 
-const createMessage = async (req: Request<{}, {}, Message, {}>, res: Response) => {
+const createMessage = async (req: Request<'', '', Message, ''>, res: Response) => {
   try {
     const { content } = req.body;
 
-    const botReply = handleMessage(content);
-
-    const createdMessages = await prisma.$transaction([
-      prisma.message.create({
-        data: {
-          sender: 'user',
-          content,
-        },
-      }),
-      prisma.message.create({
-        data: {
-          sender: 'bot',
-          content: botReply.reply,
-        },
-      }),
-    ]);
-
-    await redisClient.rPush(
-      'chat:messages',
-      JSON.stringify({
-        sender: 'user',
-        content,
-        timestamp: new Date().toISOString(),
-        id: createdMessages[0].id,
-      }),
-    );
-    await redisClient.rPush(
-      'chat:messages',
-      JSON.stringify({
-        sender: 'bot',
-        content: botReply.reply,
-        timestamp: new Date().toISOString(),
-        id: createdMessages[1].id,
-      }),
-    );
-
-    res.status(201).json({
-      message: 'Message created',
-      data: {
-        botMessage: createdMessages[1],
-        generateWithAi: botReply.generateWithAi,
-      },
+    const userMessage = await messagesRepository.createMessage({
+      sender: 'user',
+      content,
     });
+
+    const botReply = await handleMessage(content);
+
+    const botMessage = await messagesRepository.createMessage({
+      sender: 'bot',
+      content: botReply.reply,
+    });
+
+    await messagesRepository.addMessageToQueue(botMessage);
+
+    res.status(201).json(userMessage);
     return;
   } catch (error) {
     console.error('Error creating message:', error);
