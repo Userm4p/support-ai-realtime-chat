@@ -116,6 +116,33 @@ NEXT_PUBLIC_MQTT_URL=ws://localhost:9001
 
 ---
 
+## Calidad y Estilo de Código
+
+Este proyecto utiliza **ESLint** y **Prettier** tanto en el frontend como en el backend para asegurar un código limpio, consistente y fácil de mantener.
+
+- **ESLint**: Herramienta de análisis estático que ayuda a identificar y corregir problemas en el código JavaScript/TypeScript, promoviendo buenas prácticas y evitando errores comunes.
+- **Prettier**: Formateador de código que asegura un estilo consistente en toda la base de código, facilitando la colaboración entre desarrolladores.
+
+Ambas herramientas contribuyen a:
+- Mejorar la calidad del código.
+- Facilitar la escalabilidad y mantenibilidad del proyecto.
+- Reducir errores y discrepancias de estilo.
+
+Puedes ejecutar los siguientes comandos para analizar y formatear el código:
+
+### Backend
+```bash
+npm run lint      # Analiza el código con ESLint
+npm run format    # Formatea el código con Prettier
+```
+
+### Frontend
+```bash
+npm run lint      # Analiza el código con ESLint
+npm run format    # Formatea el código con Prettier
+```
+
+---
 
 ## Explicación de la Integración
 
