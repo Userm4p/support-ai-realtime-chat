@@ -74,7 +74,7 @@ Este proyecto es una aplicación de chat de soporte en tiempo real, construida c
 | `REDIS_URL`               | URL de conexión a Redis.                                                                    | `redis://redis:6379`                     |
 | `DATABASE_URL`            | URL de conexión a la base de datos PostgreSQL.                                              | `postgresql://chatuser:chatpass@postgres:5432/chatdb` |
 | `OPEN_ROUTER_API_KEY`     | API Key para acceder a OpenAI o el modelo LLM configurado. [Para generarla se debe ingresar a este enlace](https://openrouter.ai/settings/keys)                                  | `sk-xxxxxxx`                             |
-| `OPEN_ROUTER_BASE_URL`    | URL base para el endpoint de OpenAI o el modelo LLM.                                        | `https://api.openai.com/v1`              |
+| `OPEN_ROUTER_BASE_URL`    | URL base para el endpoint de OpenAI o el modelo LLM.                                        | `https://openrouter.ai/api/v1`              |
 | `OPEN_ROUTER_MODEL`       | Nombre del modelo LLM a utilizar (por ejemplo, deepseek).                                   | `deepseek/deepseek-chat-v3-0324:free`                          |
 | `FRONTEND_URL`            | URL del frontend permitida para CORS.                                                       | `http://localhost:3000`                  |
 
@@ -84,9 +84,9 @@ PORT=4000
 MQTT_BROKER=mqtt://mqtt:1883
 REDIS_URL=redis://redis:6379
 DATABASE_URL=postgresql://chatuser:chatpass@postgres:5432/chatdb
-OPEN_ROUTER_API_KEY=sk-xxxxxxx
-OPEN_ROUTER_BASE_URL=https://api.openai.com/v1
-OPEN_ROUTER_MODEL=deepseek-chat
+OPEN_ROUTER_API_KEY=sk-xxxxxxxx
+OPEN_ROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPEN_ROUTER_MODEL=deepseek/deepseek-chat-v3-0324:free
 FRONTEND_URL=http://localhost:3000
 ```
 
