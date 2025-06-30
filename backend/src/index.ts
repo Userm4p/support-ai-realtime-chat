@@ -22,3 +22,5 @@ app.listen(envs.port, async () => {
 
   console.log(`Server running on port: ${envs.port}`);
 });
+
+export { app };

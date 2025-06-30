@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es6"
-    ],
+    "lib": ["es6"],
     "alwaysStrict": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
+    "isolatedModules": true
   },
-  "files": [
-    "src/index.ts"
-  ]
+  "files": ["src/index.ts"]
 }

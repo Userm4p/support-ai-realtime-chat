@@ -40,7 +40,12 @@ const Chat = () => {
       messages.length === 0 &&
       currentConversationMessagesToShow.length === 0
     );
-  }, [loadingMessages, messages.length, currentConversationMessagesToShow.length, loadingAllMessages]);
+  }, [
+    loadingMessages,
+    messages.length,
+    currentConversationMessagesToShow.length,
+    loadingAllMessages,
+  ]);
 
   const showOldMessagesAdvice = useMemo(() => {
     return messages.length > 0;
