@@ -308,3 +308,29 @@ graph TD
 - **Dockerfile, package.json, tsconfig.json**: Archivos de configuración y dependencias.
 
 ---
+
+## Pruebas y Cobertura (Testing & Coverage)
+
+El proyecto cuenta con una suite de tests automatizados tanto en el frontend como en el backend para asegurar la calidad y robustez del código.
+
+- **Frontend:**
+  - Cobertura actual: **87.87%**
+  - Ejecuta los tests con:
+    ```bash
+    cd frontend
+    npm run test
+    ```
+  - Al ejecutar los tests se genera automáticamente un reporte de cobertura (coverage) en la carpeta `coverage/`.
+
+- **Backend:**
+  - Cobertura actual: **95.58%**
+  - Ejecuta los tests con:
+    ```bash
+    cd backend
+    npm run test
+    ```
+  - Al ejecutar los tests se genera automáticamente un reporte de cobertura (coverage) en la carpeta `coverage/`.
+
+**Nota:** Los tests cubren los casos principales de uso, manejo de errores y flujos críticos de la aplicación. Se recomienda mantener y aumentar la cobertura para asegurar la calidad del proyecto a largo plazo.
+
+---
