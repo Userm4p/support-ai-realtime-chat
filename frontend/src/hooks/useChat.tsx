@@ -54,12 +54,13 @@ export const useChat = (): ChatContextType => {
     return () => observer.disconnect();
   }, []);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (rest: boolean = false) => {
     setLoading(prev => ({ ...prev, messages: true }));
     try {
-      const { data } = await instance.get<MessagesResp>('/api/messages');
+      const { data } = await instance.get<MessagesResp>(`/api/messages${rest ? '?rest=true' : ''}`);
       setMessages(data.messages);
       setTotalMessages(data.total);
+      
     } catch (error) {
       console.error('Error fetching messages:', error);
       setErrors(prev => [...prev, 'Error obteniendo mensajes']);
@@ -71,16 +72,12 @@ export const useChat = (): ChatContextType => {
   const fetchAllMessages = useCallback(async () => {
     setLoading(prev => ({ ...prev, allMessages: true }));
     try {
-      const { data } = await instance.get<MessagesResp>('/api/messages?rest=true');
-      setMessages(data.messages);
-      handleScrollToBottom();
-    } catch (error) {
-      console.error('Error fetching all messages:', error);
-      setErrors(prev => [...prev, 'Error Obteniendo todos los mensajes']);
+      await fetchMessages(true);
+    } catch {
     } finally {
       setLoading(prev => ({ ...prev, allMessages: false }));
     }
-  }, [handleScrollToBottom]);
+  }, [handleScrollToBottom, fetchMessages]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim()) return;

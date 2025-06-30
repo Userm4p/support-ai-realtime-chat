@@ -25,6 +25,7 @@ describe('useChat', () => {
   });
 
   test('fetchMessages maneja errores correctamente', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockedAxios.create.mockReturnThis();
     mockedAxios.get.mockRejectedValueOnce(new Error('fail'));
     const { result } = renderHook(() => useChat());
@@ -32,6 +33,7 @@ describe('useChat', () => {
       await result.current.fetchMessages();
     });
     expect(result.current.errors).toContain('Error obteniendo mensajes');
+    consoleErrorSpy.mockRestore();
   });
 
   test('fetchAllMessages actualiza mensajes correctamente', async () => {
@@ -47,13 +49,15 @@ describe('useChat', () => {
   });
 
   test('fetchAllMessages maneja errores correctamente', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockedAxios.create.mockReturnThis();
     mockedAxios.get.mockRejectedValueOnce(new Error('fail'));
     const { result } = renderHook(() => useChat());
     await act(async () => {
       await result.current.fetchAllMessages();
     });
-    expect(result.current.errors).toContain('Error Obteniendo todos los mensajes');
+    expect(result.current.errors).toContain('Error obteniendo mensajes');
+    consoleErrorSpy.mockRestore();
   });
 
   test('handleSend agrega mensaje y limpia input (flujo exitoso)', async () => {
@@ -72,6 +76,7 @@ describe('useChat', () => {
   });
 
   test('handleSend maneja errores correctamente', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     mockedAxios.create.mockReturnThis();
     mockedAxios.post.mockRejectedValueOnce(new Error('fail'));
     const { result } = renderHook(() => useChat());
@@ -82,6 +87,7 @@ describe('useChat', () => {
       await result.current.handleSend();
     });
     expect(result.current.errors).toContain('Error enviando mensaje');
+    consoleErrorSpy.mockRestore();
   });
 
   test('handleSend no envía si el input está vacío', async () => {

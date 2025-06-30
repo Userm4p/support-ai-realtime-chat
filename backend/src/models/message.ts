@@ -14,4 +14,5 @@ const messageSchema = z.object({
   content: z.string().min(1),
 });
 
-export { Message, messageSchema };
+export { messageSchema };
+export type { Message, Sender };
